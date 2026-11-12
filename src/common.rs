@@ -2511,6 +2511,10 @@ pub fn load_custom_client() {
         .write()
         .unwrap()
         .insert(keys::OPTION_APPROVE_MODE.to_owned(), "click".to_owned());
+    config::HARD_SETTINGS
+        .write()
+        .unwrap()
+        .insert("conn-type".to_owned(), "incoming".to_owned());
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
