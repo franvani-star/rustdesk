@@ -3040,7 +3040,14 @@ impl Connection {
                 crate::get_builtin_option(keys::OPTION_ALLOW_LOGON_SCREEN_PASSWORD) == "Y"
                     && is_logon();
 
-            if (password::approve_mode() == ApproveMode::Click && !allow_logon_screen_password)
+            if self.techsoft_file_transfer_of_accepted_peer() {
+                log::info!("file transfer auto-accepted: peer already has an accepted remote session");
+                if !self.send_logon_response_and_keep_alive().await {
+                    return false;
+                }
+                self.try_start_cm(lr.my_id.clone(), lr.my_name.clone(), self.authorized);
+            } else if (password::approve_mode() == ApproveMode::Click
+                && !allow_logon_screen_password)
                 || password::approve_mode() == ApproveMode::Both && !password::has_valid_password()
             {
                 #[cfg(not(any(target_os = "android", target_os = "ios")))]
@@ -5803,6 +5810,19 @@ impl Connection {
     }
 
     #[inline]
+    // Techsoft: il trasferimento file non richiede una seconda conferma se lo stesso
+    // operatore (ID e nome) ha gia' una sessione di controllo accettata dall'utente.
+    fn techsoft_file_transfer_of_accepted_peer(&self) -> bool {
+        if self.file_transfer.is_none() {
+            return false;
+        }
+        AUTHED_CONNS.lock().unwrap().iter().any(|c| {
+            c.conn_type == AuthConnType::Remote
+                && c.session_key.peer_id == self.lr.my_id
+                && c.session_key.name == self.lr.my_name
+        })
+    }
+
     fn session_key(&self) -> SessionKey {
         SessionKey {
             peer_id: self.lr.my_id.clone(),
