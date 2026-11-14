@@ -2519,6 +2519,33 @@ pub fn load_custom_client() {
         .write()
         .unwrap()
         .insert("disable-installation".to_owned(), "Y".to_owned());
+    // --- TechSoft: opzioni predefinite del client di assistenza ---
+    // Comodita' (default: l'utente puo' ancora cambiarle per sessione/impostazioni).
+    config::DEFAULT_DISPLAY_SETTINGS.write().unwrap().extend([
+        // copia-incolla file sempre acceso di default (gia' "Y" di base, esplicito qui)
+        (keys::OPTION_ENABLE_FILE_COPY_PASTE.to_owned(), "Y".to_owned()),
+        // audio del cliente spento di default (meno banda), riattivabile per sessione
+        (keys::OPTION_DISABLE_AUDIO.to_owned(), "Y".to_owned()),
+    ]);
+    config::DEFAULT_SETTINGS.write().unwrap().insert(
+        // chi assiste puo' riavviare il PC del cliente e riconnettersi
+        keys::OPTION_ENABLE_REMOTE_RESTART.to_owned(),
+        "Y".to_owned(),
+    );
+    config::DEFAULT_LOCAL_SETTINGS.write().unwrap().extend([
+        // piu' assistenze in schede, con conferma prima di chiudere
+        (keys::OPTION_ENABLE_OPEN_NEW_CONNECTIONS_IN_TABS.to_owned(), "Y".to_owned()),
+        (keys::OPTION_ENABLE_CONFIRM_CLOSING_TABS.to_owned(), "Y".to_owned()),
+    ]);
+    // Blindatura del client (forzate: l'utente non le cambia).
+    config::OVERWRITE_SETTINGS.write().unwrap().extend([
+        (keys::OPTION_ENABLE_LAN_DISCOVERY.to_owned(), "N".to_owned()),
+        (keys::OPTION_ALLOW_REMOTE_CONFIG_MODIFICATION.to_owned(), "N".to_owned()),
+    ]);
+    config::BUILTIN_SETTINGS.write().unwrap().extend([
+        (keys::OPTION_HIDE_SERVER_SETTINGS.to_owned(), "Y".to_owned()),
+        (keys::OPTION_HIDE_NETWORK_SETTINGS.to_owned(), "Y".to_owned()),
+    ]);
     #[cfg(debug_assertions)]
     if let Ok(data) = std::fs::read_to_string("./custom.txt") {
         read_custom_client(data.trim());
