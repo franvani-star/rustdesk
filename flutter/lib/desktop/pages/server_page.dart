@@ -1082,7 +1082,7 @@ class _CmControlPanel extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         Offstage(
-          offstage: true || !showElevation || !showAccept,
+          offstage: !showElevation || !showAccept,
           child: buildButton(context, color: Colors.green[700], onClick: () {
             handleAccept(context);
             handleElevate(context);
@@ -1109,9 +1109,6 @@ class _CmControlPanel extends StatelessWidget {
                       color: MyTheme.accent,
                       onClick: () {
                         handleAccept(context);
-                        if (canElevate && client.type_() == ClientType.remote) {
-                          handleElevate(context);
-                        }
                         windowManager.minimize();
                       },
                       text: 'Accept',
