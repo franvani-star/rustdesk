@@ -4698,7 +4698,10 @@ impl Connection {
             err = "No permission".to_string();
         } else {
             err = "No need to elevate".to_string();
-            if !crate::platform::is_installed() && !portable_client::running() {
+            if !crate::platform::is_installed()
+                && !portable_client::running()
+                && !crate::platform::is_elevated(None).unwrap_or(false)
+            {
                 err = portable_client::start_portable_service(para)
                     .err()
                     .map_or("".to_string(), |e| e.to_string());
@@ -5683,7 +5686,9 @@ impl Connection {
         if self.portable.is_installed || !self.is_remote() || !self.keyboard {
             return;
         }
-        let running = portable_client::running();
+        // Techsoft: se il programma e' gia' partito come amministratore non serve elevare
+        let running = portable_client::running()
+            || crate::platform::is_elevated(None).unwrap_or(false);
         let show_elevation = !running;
         self.send_to_cm(ipc::Data::DataPortableService(
             ipc::DataPortableService::CmShowElevation(show_elevation),

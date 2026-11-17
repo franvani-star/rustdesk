@@ -158,6 +158,9 @@ jobs:
         shell: bash
         run: |
           sed -i '/dpiAware/d' res/manifest.xml
+          # Techsoft: l'exe consegnato chiede i permessi da amministratore all'avvio (una volta sola, come AnyDesk)
+          sed -i 's#</assembly>#  <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3"><security><requestedPrivileges><requestedExecutionLevel level="requireAdministrator" uiAccess="false"/></requestedPrivileges></security></trustInfo>\n</assembly>#' res/manifest.xml
+          grep -n "requireAdministrator" res/manifest.xml
           pushd ./libs/portable
           pip3 install -r requirements.txt
           python3 ./generate.py -f ../../rustdesk/ -o . -e ../../rustdesk/rustdesk.exe
